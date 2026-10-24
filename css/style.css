@@ -1,0 +1,475 @@
+/*
+ * TryOn TV. Plain CSS (no grid; custom properties only for the optional result background).
+ *
+ * The stage is NOT a fixed 1920x1080 box: ui.js sizes it to the real screen (portrait or landscape,
+ * any aspect ratio) in "design pixels" where the SHORT side of the screen is 1080, and scales it to
+ * the physical resolution. So a 1080x1920 portrait TV gets a 1080x1920 stage, a landscape TV gets
+ * 1920x1080, and every layer simply fills the stage (width/height 100%).
+ */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    cursor: none;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    color: #fff;
+    /* Width, height and scale are set by ui.js to fit the actual screen. */
+    transform-origin: 0 0;
+}
+
+.layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    /* stay fully visible underneath until the incoming screen has faded in, then vanish */
+    transition: opacity 0s linear 0.4s, visibility 0s linear 0.4s;
+}
+
+.layer.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    transition: opacity 0.4s ease, visibility 0s linear 0s;
+}
+
+/* ---------- brand ---------- */
+.brand {
+    font-size: 120px;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+/* ---------- (a) pairing ---------- */
+#pairing {
+    text-align: center;
+    background: radial-gradient(ellipse at center, #1b2433 0%, #07090d 75%);
+}
+
+#pairing .brand {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 130px;
+}
+
+.pairing-label {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 400px;
+    font-size: 40px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #8fa0bb;
+}
+
+.pairing-code {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 460px;
+    font-size: 240px;
+    font-weight: 700;
+    letter-spacing: 30px;
+    color: #fff;
+    text-indent: 30px;
+}
+
+.pairing-status {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 780px;
+    font-size: 54px;
+    color: #ffd166;
+}
+
+.pairing-status.ok {
+    color: #7bd88f;
+}
+
+.pairing-hint {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 0 60px;
+    top: 870px;
+    font-size: 34px;
+    color: #8fa0bb;
+}
+
+.pairing-footer {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    bottom: 36px;
+    font-size: 24px;
+    color: #55627a;
+}
+
+/* ---------- (b) ads ---------- */
+#ads {
+    background: #000;
+}
+
+.ad-media {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* ads.js switches to "cover" when TV.config.adFit === 'cover' */
+    background: #000;
+    border: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease;
+}
+
+.ad-media.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.idle-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: radial-gradient(ellipse at center, #1b2433 0%, #07090d 75%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+}
+
+.idle-screen.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.idle-screen .brand {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 420px;
+    font-size: 160px;
+}
+
+.idle-tagline {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 620px;
+    font-size: 44px;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    color: #8fa0bb;
+}
+
+/* ---------- (c) results ---------- */
+#results {
+    /* --results-bg is the admin-chosen photo background colour (set by results.js) */
+    background: var(--results-bg, #000);
+}
+
+.slides {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.slide {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--results-bg, #000);
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    /* own compositor layer: slides move on the GPU instead of repainting a full-screen image */
+    will-change: transform, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    /* fill the whole screen: no bars, no empty space (the AI paints the admin-chosen colour behind
+       the person, so what gets cropped at the sides is background) */
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.slide.ready img {
+    opacity: 1;
+}
+
+.slide.animating {
+    transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.45s ease;
+}
+
+/* shown on a slide until its image has finished downloading */
+.slide-loading {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.ready .slide-loading,
+.slide.failed .slide-loading {
+    display: none;
+}
+
+.slide-loading .spinner {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    margin-left: -60px;
+    margin-top: -60px;
+    width: 120px;
+    height: 120px;
+    border: 10px solid var(--results-fg-dim, rgba(255, 255, 255, 0.18));
+    border-top-color: var(--results-fg, #fff);
+    border-radius: 60px;
+    -webkit-animation: tv-spin 0.9s linear infinite;
+    animation: tv-spin 0.9s linear infinite;
+}
+
+.slide-loading .loading-text {
+    position: absolute;
+    left: 0;
+    top: calc(45% + 90px);
+    width: 100%;
+    text-align: center;
+    font-size: 36px;
+    color: var(--results-fg, #8fa0bb);
+    opacity: 0.7;
+}
+
+@-webkit-keyframes tv-spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes tv-spin {
+    to { transform: rotate(360deg); }
+}
+
+.slide-error {
+    position: absolute;
+    left: 0;
+    top: 45%;
+    width: 100%;
+    text-align: center;
+    font-size: 40px;
+    color: var(--results-fg, #8fa0bb);
+}
+
+.results-bar {
+    position: absolute;
+    left: 0;
+    bottom: 36px;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+}
+
+.results-counter {
+    display: inline-block;
+    padding: 8px 26px;
+    border-radius: 30px;
+    font-size: 34px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+}
+
+.results-dots {
+    margin-top: 16px;
+    height: 22px;
+}
+
+.results-dots .dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 3px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.35);
+    transition: background 0.3s ease, width 0.3s ease;
+}
+
+.results-dots .dot.on {
+    width: 40px;
+    background: #fff;
+}
+
+.results-arrow {
+    position: absolute;
+    top: 50%;
+    margin-top: -70px;
+    width: 100px;
+    height: 140px;
+    line-height: 140px;
+    text-align: center;
+    font-size: 70px;
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.results-arrow.left {
+    left: 0;
+    border-radius: 0 20px 20px 0;
+}
+
+.results-arrow.right {
+    right: 0;
+    border-radius: 20px 0 0 20px;
+}
+
+.single .results-arrow,
+.single .results-bar {
+    display: none;
+}
+
+/* "Scan to download" QR: a white card (the quiet zone a scanner needs) over any photo. */
+.results-qr {
+    position: absolute;
+    z-index: 5;
+    width: 280px;
+    padding: 24px 24px 14px;
+    box-sizing: border-box;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.results-qr.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.results-qr.pos-top-left { top: 48px; left: 48px; }
+.results-qr.pos-top-right { top: 48px; right: 48px; }
+.results-qr.pos-bottom-left { bottom: 48px; left: 48px; }
+.results-qr.pos-bottom-right { bottom: 48px; right: 48px; }
+
+.results-qr .qr-code {
+    width: 232px;
+    height: 232px;
+}
+
+.results-qr .qr-code svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.results-qr .qr-caption {
+    margin-top: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #111827;
+}
+
+/* ---------- (d) status overlay ---------- */
+.status {
+    position: absolute;
+    right: 24px;
+    top: 20px;
+    max-width: 80%;
+    padding: 8px 20px;
+    border-radius: 24px;
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffd166;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.status.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ---------- portrait screens (stage is taller than wide, e.g. 1080x1920) ----------
+   Landscape keeps the px offsets above; portrait spreads the same blocks over the taller stage
+   with percentages and shrinks the pairing code so it fits the 1080px width. */
+#stage.portrait #pairing .brand {
+    top: 14%;
+}
+
+#stage.portrait .pairing-label {
+    top: 38%;
+}
+
+#stage.portrait .pairing-code {
+    top: 41.5%;
+    font-size: 150px;
+    letter-spacing: 14px;
+    text-indent: 14px;
+}
+
+#stage.portrait .pairing-status {
+    top: 57%;
+    padding: 0 60px;
+}
+
+#stage.portrait .pairing-hint {
+    top: 62.5%;
+    font-size: 30px;
+    padding: 0 40px;
+}
+
+#stage.portrait .idle-screen .brand {
+    top: 42%;
+}
+
+#stage.portrait .idle-tagline {
+    top: 52.5%;
+}

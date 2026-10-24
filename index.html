@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TryOn</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <!-- Samsung TV platform APIs (productinfo, avplay...). Only exists on a real TV / emulator;
+         on a desktop browser this request 404s harmlessly and the app falls back (feature-detected). -->
+    <script src="$WEBAPIS/webapis/webapis.js" onerror="window.__noWebapis = true;"></script>
+</head>
+
+<body>
+    <div id="stage">
+
+        <!-- (a) Pairing screen -->
+        <section id="pairing" class="layer">
+            <div class="brand">TryOn</div>
+            <div class="pairing-label">Pairing code</div>
+            <div id="pairingCode" class="pairing-code">------</div>
+            <div id="pairingStatus" class="pairing-status">Starting&hellip;</div>
+            <div id="pairingHint" class="pairing-hint">Ask your administrator to approve this screen in the admin panel.</div>
+            <div id="pairingFooter" class="pairing-footer"></div>
+        </section>
+
+        <!-- (b) Ad layer: image + video + branded idle fallback -->
+        <section id="ads" class="layer">
+            <img id="adImage" class="ad-media" alt="" />
+            <video id="adVideo" class="ad-media" muted playsinline webkit-playsinline preload="auto"></video>
+            <div id="adIdle" class="idle-screen">
+                <div class="brand">TryOn</div>
+                <div class="idle-tagline">Virtual try-on</div>
+            </div>
+        </section>
+
+        <!-- (c) Results slider -->
+        <section id="results" class="layer">
+            <div id="slides" class="slides"></div>
+            <div id="resultsBar" class="results-bar">
+                <div id="resultsCounter" class="results-counter">1 / 1</div>
+                <div id="resultsDots" class="results-dots"></div>
+            </div>
+            <div id="resultsArrowL" class="results-arrow left">&#10094;</div>
+            <div id="resultsArrowR" class="results-arrow right">&#10095;</div>
+            <!-- "Scan to download" QR for the photo on screen (shown/placed by the admin settings) -->
+            <div id="resultsQr" class="results-qr pos-bottom-right">
+                <div id="resultsQrCode" class="qr-code"></div>
+                <div class="qr-caption">Scan to download</div>
+            </div>
+        </section>
+
+        <!-- (d) Discreet status / connection overlay (hidden unless something is wrong) -->
+        <div id="status" class="status"></div>
+    </div>
+
+    <script src="js/vendor/socket.io.min.js"></script>
+    <script src="js/vendor/qrcode.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/pairing.js"></script>
+    <script src="js/ads.js"></script>
+    <script src="js/results.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/idle.js"></script>
+    <script src="js/keys.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

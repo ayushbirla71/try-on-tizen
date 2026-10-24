@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="http://demokrito.com/TryOn" version="1.0.0" viewmodes="maximized">
+    <tizen:application id="QEHAe6UQWO.TryOn" package="QEHAe6UQWO" required_version="5.0"/>
+    <content src="index.html"/>
+    <!--
+      Fits any screen: 1920x1080 landscape or 1080x1920 portrait (a TV turned with its own rotation
+      setting just gives the app a portrait window). Tizen has no separate "landscape" screen
+      feature: the feature names are written in portrait form, so the old template's
+      screen.size.normal.1080.1920 was simply the Tizen name for a 1080p panel. We declare "all"
+      and let screen-orientation below follow the display.
+    -->
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <icon src="icon.png"/>
+    <tizen:metadata key="http://tizen.org/metadata/app_ui_type/base_screen_resolution" value="extensive"/>
+    <name>TryOn</name>
+    <description>TryOn virtual try-on signage: loops ads and mirrors try-on results from the kiosk app.</description>
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://developer.samsung.com/privilege/productinfo"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <access origin="*" subdomains="true"/>
+    <!--
+      Permissive on purpose: the backend host is configured in js/config.js and is not known here.
+      Allows https/wss in production and http/ws for a LAN/dev backend. Tighten the connect-src /
+      img-src / media-src lists to your real origin once it is fixed.
+    -->
+    <tizen:content-security-policy>default-src 'self' file: data: blob: https: http: wss: ws:; script-src 'self' 'unsafe-inline' 'unsafe-eval' file:; style-src 'self' 'unsafe-inline' file:; img-src 'self' file: data: blob: https: http:; media-src 'self' file: data: blob: https: http:; connect-src 'self' file: https: http: wss: ws:</tizen:content-security-policy>
+    <tizen:profile name="tv-samsung"/>
+    <tizen:setting screen-orientation="auto-rotation" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
+</widget>
