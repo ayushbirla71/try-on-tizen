@@ -16,6 +16,7 @@
     var recovering = false;
     var downTimer = null;
     var booted = false;
+    var wasDisconnected = false;   // an administrator disconnected this TV (shown on the pairing screen)
 
     // ------------------------------------------------------------ view selection
     function applyView() {
@@ -65,13 +66,16 @@
     }
 
     function showPairingInfo(code, isApproved) {
+        if (isApproved) { wasDisconnected = false; }
         TV.ui.setPairing({
             code: code,
-            status: isApproved ? 'Approved - waiting to be linked to a kiosk' : 'Waiting for approval',
+            status: isApproved
+                ? 'Connected - waiting to be linked to a kiosk'
+                : (wasDisconnected ? 'Disconnected by your administrator' : 'Waiting to be connected to a client'),
             statusOk: !!isApproved,
             hint: isApproved
                 ? 'Your administrator needs to link this screen to a kiosk.'
-                : 'Ask your administrator to approve this screen in the admin panel.'
+                : 'In your admin panel open Devices, choose Add a TV and enter the code above.'
         });
     }
 
@@ -175,6 +179,19 @@
         TV.bus.on('settings:updated', function (p) {
             applySettings(p);
             TV.ads.refresh();                    // default image duration is resolved server-side
+        });
+
+        TV.bus.on('display:disconnected', function () {
+            TV.log('disconnected by the administrator -> back to pairing');
+            wasDisconnected = true;
+            setApproved(false);                  // show the pairing screen at once
+            TV.pairing.stopPolling();
+            TV.socket.disconnect();
+            TV.pairing.reset();                  // the old token is dead; ask for a fresh pairing code
+            serverState = null;
+            localOverride = false;
+            TV.ui.setPairing({ code: '------', status: 'Disconnected by your administrator', statusOk: false, footer: pairingFooter() });
+            recover();
         });
 
         TV.bus.on('api:unauthorized', recover);

@@ -112,6 +112,8 @@
             mine.on('ads:updated', function (p) { TV.bus.emit('ads:updated', p); });
             mine.on('settings:updated', function (p) { TV.bus.emit('settings:updated', p); });
             mine.on('display:approved', function (p) { TV.bus.emit('display:approved', p); });
+            // an administrator took this TV back from its client (admin panel -> Devices -> Disconnect)
+            mine.on('display:disconnected', function (p) { if (mine === sock) { TV.bus.emit('display:disconnected', p); } });
         },
 
         disconnect: function () {
